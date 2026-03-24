@@ -3,6 +3,8 @@ import React, { useState } from "react";
 function HomePage() {
   const [selectedOption, setSelectedOption] = useState("entailment");
   const [functionalDependencies, setFunctionalDependencies] = useState("");
+  const [dependencyToCheck, setDependencyToCheck] = useState("")
+  const [decompositionToCheck, setDecompositionToCheck] = useState("")
   const [result, setResult] = useState("");
 
   const endpointMap = {
@@ -63,6 +65,51 @@ function HomePage() {
             <option value="lossless">Lossless decomposition</option>
             <option value="minimal-cover">Minimal cover generation</option>
           </select>
+
+          {selectedOption === "entailment" && (
+            <div style={{ marginBottom: "22px" }}>
+              <label style={{ display: "block", padding: "16px", fontWeight: "bold", color: "#374151" }}>
+                Enter Dependency to check
+              </label>
+
+              <textarea
+                value={dependencyToCheck}
+                onChange={(e) => setDependencyToCheck(e.target.value)}
+                placeholder={"Example: A -> B"}
+                style={{ width: "100%", height: "50px", padding: "16px", borderRadius: "14px", border: "2px solid #dbeafe", backgroundColor: "#fcfdff", fontSize: "1rem", resize: "vertical", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+          )}
+
+          {selectedOption === "lossless" && (
+            <div style={{ marginBottom: "22px" }}>
+              <label style={{ display: "block", padding: "16px", fontWeight: "bold", color: "#374151" }}>
+                Enter Decomposition to check
+              </label>
+
+              <textarea
+                value={decompositionToCheck}
+                onChange={(e) => setDecompositionToCheck(e.target.value)}
+                placeholder={"Example: {A,B,C}, {B,C,D}, {B,D,E}"}
+                style={{ width: "100%", height: "50px", padding: "16px", borderRadius: "14px", border: "2px solid #dbeafe", backgroundColor: "#fcfdff", fontSize: "1rem", resize: "vertical", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+          )}
+
+          {selectedOption !== "minimal-cover" && (
+            <div style={{ marginBottom: "22px" }}>
+              <label style={{ display: "block", marginBottom: "10px", fontWeight: "bold", color: "#374151" }}>
+                Enter Attributes
+              </label>
+
+              <textarea
+                value={functionalDependencies}
+                onChange={(e) => setFunctionalDependencies(e.target.value)}
+                placeholder={"Example: A,B,C,D,E"}
+                style={{ width: "100%", height: "50px", padding: "16px", borderRadius: "14px", border: "2px solid #dbeafe", backgroundColor: "#fcfdff", fontSize: "1rem", resize: "vertical", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: "22px" }}>
