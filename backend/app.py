@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from algorithm import algo2, lossless_chase
+from algorithm import algo2, lossless_chase, chase
 
 app = Flask(__name__)
 CORS(app)
@@ -86,6 +86,13 @@ def format_fds(fds):
 
     return "\n".join(lines)
 
+def parse_dependency(text):
+    if not text or not text.strip():
+        raise ValueError("Dependencies input is required.")
+
+    lhs = set(text.split()[0])
+    rhs = set(text.split()[2])
+    return lhs, rhs
 
 @app.route("/", methods=["GET"])
 def home():
@@ -142,9 +149,28 @@ def lossless_decomposition():
 
 @app.route("/api/entailment", methods=["POST"])
 def entailment():
-    return jsonify({
-        "message": "Entailment endpoint not implemented yet."
-    }), 200
+    try:
+        data = request.get_json(silent=True) or {}
+
+        attrs_text = data.get("attributes", "")
+        fd_text = data.get("functionalDependencies", "")
+        depend_text = data.get("dependency", "")
+
+        attrs = parse_attributes(attrs_text)
+        fds = parse_fds(fd_text)
+        depenencies = parse_dependency(depend_text)
+
+        result = chase(attrs, fds, depenencies)
+
+        return jsonify({
+            "message": "Entailment check completed successfully.",
+            "result": "True: Dependency is logically entailed" if result else "False, Dependency is not logically entailed"
+        }), 200
+
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

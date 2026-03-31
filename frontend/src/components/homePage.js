@@ -5,6 +5,7 @@ function HomePage() {
   const [attributes, setAttributes] = useState("");
   const [functionalDependencies, setFunctionalDependencies] = useState("");
   const [decomposition, setDecomposition] = useState("");
+  const [dependency, setDependency] = useState("")
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +34,12 @@ function HomePage() {
       }
 
       if (selectedOption === "minimal-cover") {
-        payload.attributes = attributes; // included even if backend does not use it
+        payload.attributes = attributes; // included even if backend does not use it - removed
+      }
+
+      if (selectedOption == "entailment") {
+        payload.attributes = attributes;
+        payload.dependency = dependency;
       }
 
       const response = await fetch(endpoint, {
@@ -57,12 +63,14 @@ function HomePage() {
   };
 
   const showAttributes =
-    selectedOption === "lossless" || selectedOption === "minimal-cover";
+    selectedOption === "lossless" || selectedOption === "entailment";
 
   const showFD =
-    selectedOption === "lossless" || selectedOption === "minimal-cover";
+    selectedOption === "lossless" || selectedOption === "minimal-cover" || selectedOption =="entailment";
 
   const showDecomposition = selectedOption === "lossless";
+
+  const showDependency = selectedOption =="entailment";
 
   return (
     <div
@@ -130,6 +138,7 @@ function HomePage() {
               setAttributes("");
               setFunctionalDependencies("");
               setDecomposition("");
+              setDependency("");
               setResult("");
             }}
             style={{
@@ -202,6 +211,39 @@ function HomePage() {
               style={{
                 width: "100%",
                 height: "220px",
+                padding: "16px",
+                borderRadius: "14px",
+                border: "2px solid #dbeafe",
+                backgroundColor: "#fcfdff",
+                fontSize: "1rem",
+                resize: "vertical",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+        )}
+
+        {showDependency && (
+          <div style={{ marginBottom: "22px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "10px",
+                fontWeight: "bold",
+                color: "#374151",
+              }}
+            >
+              Enter Dependency to Check
+            </label>
+
+            <textarea
+              value={dependency}
+              onChange={(e) => setDependency(e.target.value)}
+              placeholder={"Example:\nA -> B \nB -> C \nAC -> D"}
+              style={{
+                width: "100%",
+                height: "120px",
                 padding: "16px",
                 borderRadius: "14px",
                 border: "2px solid #dbeafe",
