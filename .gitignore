@@ -1,0 +1,12 @@
+# Python cache and virtual environments
+**/__pycache__/
+*.py[cod]
+backend/.venv/
+backend/myenv/
+
+# Node artifacts
+frontend/node_modules/
+frontend/build/
+
+# OS artifacts
+.DS_Store

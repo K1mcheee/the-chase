@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: the-chase-backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_BASE_URL: /api
+    container_name: the-chase-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
