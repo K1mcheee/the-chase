@@ -73,8 +73,8 @@ function HomePage() {
 		selectedOption === "entailment";
 
 	const showDecomposition = selectedOption === "lossless";
-
 	const showDependency = selectedOption === "entailment";
+  const showMC = selectedOption == "minimal-cover";
 
 	return (
 		<div
@@ -118,7 +118,7 @@ function HomePage() {
 						fontSize: "1rem",
 					}}
 				>
-					Pick a challenge, enter your input, and validate.
+					Pick a challenge, enter your input, and check.
 				</p>
 
 				<div style={{ marginBottom: "22px" }}>
@@ -310,7 +310,8 @@ function HomePage() {
 						opacity: loading ? 0.7 : 1,
 					}}
 				>
-					{loading ? "Validating..." : "Validate"}
+					{/* {loading ? "Validating..." : "Validate"} */}
+					{loading && showMC? "Generating..." : loading ? "Validating" : showMC ? "Generate" : "Validate"}
 				</button>
 
 				{result && (
