@@ -8,6 +8,8 @@ function HomePage() {
 	const [dependency, setDependency] = useState("");
 	const [result, setResult] = useState("");
 	const [loading, setLoading] = useState(false);
+  const [table, setTable] = useState("");
+  const [showTable, setShowTable] = useState(false);
 
 	const API_BASE_URL =
 		process.env.REACT_APP_API_BASE_URL || "http://localhost:8080/api";
@@ -21,8 +23,11 @@ function HomePage() {
 	const handleCheck = async () => {
 		const baseUrl = API_BASE_URL.replace(/\/$/, "");
 		const endpoint = `${baseUrl}${endpointMap[selectedOption]}`;
+
 		setLoading(true);
 		setResult("");
+    setTable("");
+    setShowTable(false);
 
 		try {
 			const payload = {
@@ -56,7 +61,12 @@ function HomePage() {
 				throw new Error(data.message || "Something went wrong");
 			}
 
-			setResult(data.result || data.message);
+      // setShowTable(
+      //   data.result === "Not lossless decomposition." ||
+      //   data.result === "False, Dependency is not logically entailed."
+      // );			
+      setResult(data.result || data.message);
+      setTable(data.table || "")
 		} catch (error) {
 			setResult(error.message || "Error connecting to backend");
 		} finally {
@@ -313,23 +323,108 @@ function HomePage() {
 					{/* {loading ? "Validating..." : "Validate"} */}
 					{loading && showMC? "Generating..." : loading ? "Validating" : showMC ? "Generate" : "Validate"}
 				</button>
+        
+        {result && (
+          <div style={{
+            marginTop: "22px",
+            padding: "16px",
+            borderRadius: "12px",
+            backgroundColor: "#f3f4f6",
+            textAlign: "center",
+            fontWeight: "bold",
+            color: "#1f2937",
+            whiteSpace: "pre-wrap",
+          }}>
+            {result}
+            {table && (
+              <div style={{ marginTop: "16px" }}>
+                <button
+                  onClick={() => setShowTable(!showTable)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "7px 16px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #d1d5db",
+                    backgroundColor: showTable ? "#1f2937" : "#ffffff",
+                    color: showTable ? "#ffffff" : "#1f2937",
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <span style={{ fontSize: "15px" }}>{showTable ? "▲" : "▼"}</span>
+                  {showTable ? "Hide Chase Table" : "Show Chase Table"}
+                </button>
 
-				{result && (
-					<div
-						style={{
-							marginTop: "22px",
-							padding: "16px",
-							borderRadius: "12px",
-							backgroundColor: "#f3f4f6",
-							textAlign: "center",
-							fontWeight: "bold",
-							color: "#1f2937",
-							whiteSpace: "pre-wrap",
-						}}
-					>
-						{result}
-					</div>
-				)}
+                {showTable && showDecomposition && (
+                  <>
+                  <div style={{
+                    marginTop: "8px",
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontStyle: "italic",
+                    fontWeight: "normal",
+                  }}>
+                    💡 The chase is lossless if there exists a row with all unsubscripted values (X).
+                  </div>
+                  
+                  <pre style={{
+                    marginTop: "10px",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #e5e7eb",
+                    backgroundColor: "#ffffff",
+                    textAlign: "left",
+                    fontWeight: "normal",
+                    fontSize: "13px",
+                    fontFamily: "monospace",
+                    whiteSpace: "pre",
+                    overflowX: "auto",
+                    color: "#374151",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                  }}>
+                    {table}
+                  </pre>
+                  </>
+                )}
+
+                {showTable && showDependency && (
+                  <>
+                  <div style={{
+                    marginTop: "8px",
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontStyle: "italic",
+                    fontWeight: "normal",
+                  }}>
+                    💡 A dependency LHS → RHS is entailed if every pair of rows that agree on LHS also agree on RHS.
+                  </div>
+
+                  <pre style={{
+                    marginTop: "10px",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #e5e7eb",
+                    backgroundColor: "#ffffff",
+                    textAlign: "left",
+                    fontWeight: "normal",
+                    fontSize: "13px",
+                    fontFamily: "monospace",
+                    whiteSpace: "pre",
+                    overflowX: "auto",
+                    color: "#374151",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                  }}>
+                    {table}
+                  </pre>
+                  </>
+                )}
+              </div>)}
+          </div>
+        )}
 			</div>
 		</div>
 	);

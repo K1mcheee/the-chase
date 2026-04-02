@@ -281,7 +281,7 @@ def chase(attrs, FD, c):
             res = False
 
     print(tbl)
-    return res
+    return res, tbl
 
 """
 Testcases
@@ -364,9 +364,14 @@ chaseFD15 = [
     ({"C"}, {"A", "B"}), ({"D"}, {"A", "E"}),
     ({"B", "D"}, {"A", "C"})
     ]
+# AB -> C
+# AC -> BD
+# C -> AB
+# D -> AE
+# BD -> AC   
     
-# print("\nLossless Table")
-# print(lossless_table(sorted(chaseR15), decom1))
+print("\nLossless Table")
+print(lossless_table(sorted(chaseR15), decom1))
     
 
 def lossless_chase(attrs, FD, decom):
@@ -396,10 +401,26 @@ def lossless_chase(attrs, FD, decom):
                             changed = True
 
         if any(all(v == "X" for v in row.values()) for row in tbl):
-            return True
+            return (True, tbl)
+    
+    return (False, tbl)
 
-    return False
+def format_table(tbl):
+    if not tbl:
+        return "No data"
+    
+    columns = tbl[0].keys()
 
+    col_widths = {col: max(len(str(col)), max(len(str(row[col])) for row in tbl)) for col in columns}
+
+    header = " | ".join(f"{col:{col_widths[col]}}" for col in columns)
+    separator = "-+-".join("-" * col_widths[col] for col in columns)
+
+    rows = []
+    for row in tbl:
+        rows.append(" | ".join(f"{str(row[col]):{col_widths[col]}}" for col in columns))
+
+    return "\n".join([header, separator] + rows)
 
 # tbl = [{'A': 'X', 'B': 'X', 'C': 'X', 'D': 'D1', 'E': 'E1'}, {'A': 'A2', 'B': 'X', 'C': 'X', 'D': 'X', 'E': 'E2'}, {'A': 'A3', 'B': 'B3', 'C': 'X', 'D': 'X', 'E': 'X'}]
 

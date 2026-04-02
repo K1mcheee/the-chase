@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 
-from algorithm import algo2, lossless_chase, chase
+from algorithm import algo2, lossless_chase, chase, format_table
 
 app = Flask(__name__)
 CORS(app)
@@ -135,16 +135,19 @@ def lossless_decomposition():
         fds = parse_fds(fd_text)
         decomposition = parse_decomposition(decomp_text)
 
-        result = lossless_chase(attrs, fds, decomposition)
-
+        result, tbl = lossless_chase(attrs, fds, decomposition)
+        formatted_table = format_table(tbl)
         return jsonify({
             "message": "Lossless decomposition check completed successfully.",
-            "result": "Lossless decomposition" if result else "Not lossless decomposition"
+            "result": "Lossless decomposition" if result else "Not lossless decomposition.",
+            "table": formatted_table
         }), 200
 
     except ValueError as e:
+        print("ValueError:", repr(e))
         return jsonify({"message": str(e)}), 400
     except Exception as e:
+        print("Exception:", repr(e))
         return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 
@@ -161,11 +164,13 @@ def entailment():
         fds = parse_fds(fd_text)
         depenencies = parse_dependency(depend_text)
 
-        result = chase(attrs, fds, depenencies)
+        result, tbl = chase(attrs, fds, depenencies)
+        formatted_table = format_table(tbl)
 
         return jsonify({
             "message": "Entailment check completed successfully.",
-            "result": "True: Dependency is logically entailed" if result else "False, Dependency is not logically entailed"
+            "result": "True: Dependency is logically entailed." if result else "False, Dependency is not logically entailed.",
+            "table": formatted_table
         }), 200
 
     except ValueError as e:
