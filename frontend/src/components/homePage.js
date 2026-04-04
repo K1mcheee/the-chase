@@ -254,7 +254,7 @@ function HomePage() {
 						<textarea
 							value={dependency}
 							onChange={(e) => setDependency(e.target.value)}
-							placeholder={"Example:\nA -> B \nB -> C \nAC -> D"}
+							placeholder={"Example:\nA -> B"}
 							style={{
 								width: "100%",
 								height: "120px",

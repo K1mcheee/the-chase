@@ -13,6 +13,7 @@ def parse_attributes(text):
         raise ValueError("Attributes input is required.")
 
     cleaned = text.replace(",", "").replace(" ", "").upper()
+    print(cleaned)
     attrs = set(cleaned)
 
     if not attrs:
@@ -23,8 +24,27 @@ def parse_attributes(text):
 
     return attrs
 
+def parse_fd(text, attrs):
+    if text.count("->") != 1:
+        raise ValueError(f"Invalid FD format: {text}")
+    
+    lhs_text, rhs_text = text.split("->", 1)
+    
+    lhs = set(lhs_text.replace(",", "").replace(" ", "").upper())
+    rhs = set(rhs_text.replace(",", "").replace(" ", "").upper())
 
-def parse_fds(text):
+    if not lhs or not rhs:
+        raise ValueError(f"Invalid FD format: {text}")
+
+    if not all(ch.isalnum() for ch in lhs.union(rhs)):
+        raise ValueError(f"Invalid characters in FD: {text}")
+    
+    if attrs is not None and not (lhs | rhs) <= attrs:
+        raise ValueError(f"Invalid attribute in FD: {text}")
+    
+    return lhs, rhs
+
+def parse_fds(text, attrs=None):
     if not text or not text.strip():
         raise ValueError("Functional dependencies input is required.")
 
@@ -32,25 +52,14 @@ def parse_fds(text):
     lines = [line.strip() for line in text.strip().splitlines() if line.strip()]
 
     for line in lines:
-        if "->" not in line:
-            raise ValueError(f"Invalid FD format: {line}")
-
-        lhs_text, rhs_text = line.split("->", 1)
-        lhs = set(lhs_text.replace(",", "").replace(" ", "").upper())
-        rhs = set(rhs_text.replace(",", "").replace(" ", "").upper())
-
-        if not lhs or not rhs:
-            raise ValueError(f"Invalid FD format: {line}")
-
-        if not all(ch.isalnum() for ch in lhs.union(rhs)):
-            raise ValueError(f"Invalid characters in FD: {line}")
+        lhs, rhs = parse_fd(line, attrs)
 
         fds.append((lhs, rhs))
 
     return fds
 
 
-def parse_decomposition(text):
+def parse_decomposition(text, attrs):
     if not text or not text.strip():
         raise ValueError("Decomposition input is required.")
 
@@ -67,6 +76,9 @@ def parse_decomposition(text):
 
         if not all(ch.isalnum() for ch in rel):
             raise ValueError(f"Invalid characters in decomposition part: {part}")
+            
+        if not rel <= attrs:
+            raise ValueError(f"Invalid attribute in decomposition: {part}")
 
         decomposition.append(list(rel))
 
@@ -87,13 +99,18 @@ def format_fds(fds):
 
     return "\n".join(lines)
 
-def parse_dependency(text):
+def parse_dependency(text, attrs):
     if not text or not text.strip():
         raise ValueError("Dependencies input is required.")
+    entail = [line.strip() for line in text.strip().splitlines() if line.strip()]
 
-    lhs = set(text.split()[0])
-    rhs = set(text.split()[2])
+    if len(entail) != 1:
+        raise ValueError("Only 1 dependency can be checked.")
+
+    lhs, rhs = parse_fd(entail[0], attrs)
+
     return lhs, rhs
+
 
 @app.route("/", methods=["GET"])
 def home():
@@ -132,8 +149,8 @@ def lossless_decomposition():
         decomp_text = data.get("decomposition", "")
 
         attrs = parse_attributes(attrs_text)
-        fds = parse_fds(fd_text)
-        decomposition = parse_decomposition(decomp_text)
+        fds = parse_fds(fd_text, attrs)
+        decomposition = parse_decomposition(decomp_text, attrs)
 
         result, tbl = lossless_chase(attrs, fds, decomposition)
         formatted_table = format_table(tbl)
@@ -161,8 +178,8 @@ def entailment():
         depend_text = data.get("dependency", "")
 
         attrs = parse_attributes(attrs_text)
-        fds = parse_fds(fd_text)
-        depenencies = parse_dependency(depend_text)
+        fds = parse_fds(fd_text, attrs)
+        depenencies = parse_dependency(depend_text, attrs)
 
         result, tbl = chase(attrs, fds, depenencies)
         formatted_table = format_table(tbl)
