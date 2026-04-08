@@ -117,7 +117,7 @@ function HomePage() {
 						color: "#1f2937",
 					}}
 				>
-					The Chase
+					Cut to The Chase
 				</h1>
 
 				<p
